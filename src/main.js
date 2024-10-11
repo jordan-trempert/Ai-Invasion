@@ -74,27 +74,30 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
 
-// Function to handle player message input and replace 'my special resources' with actual resources
+// Function to replace "my special resources" or "my resources" in the player's message
+function replaceResourcesInMessage(message, playerNumber) {
+    const playerResourcesList = playerNumber === 1 ? playerResources[1] : playerResources[2];
+    const resourcesString = playerResourcesList.length > 0 ? playerResourcesList.join(", ") : "no resources";
+
+    // Replace both phrases in the message
+    return message.replace(/my special resources|my resources/gi, resourcesString);
+}
+
+// Handle state input submission for starting state or player action
 document.getElementById('submit-state').addEventListener('click', async function() {
     var stateInput = document.getElementById('state-input').value.toUpperCase();
-    
-    // Check for "my resources" or "my special resources"
-    if (stateInput.includes("MY RESOURCES") || stateInput.includes("MY SPECIAL RESOURCES")) {
-        const playerResourcesList = playerResources[currentPlayer].length > 0 
-            ? playerResources[currentPlayer].join(", ") 
-            : "no resources";
-        
-        // Replace the phrase with actual resources
-        stateInput = stateInput.replace(/MY (SPECIAL )?RESOURCES/gi, playerResourcesList);
-    }
-    
-    // Continue with the Groq API and player action processing
-    if (turnPhase === 'playerTurn') {
+
+    if (turnPhase === 'chooseStart') {
+        // Logic for choosing the starting state remains unchanged...
+    } else if (turnPhase === 'playerTurn') {
         // Player action during their turn
         var actionInput = document.getElementById('state-input').value; // Player action
 
         // Prepare the message for the Groq API
-        const userMessage = `Player ${currentPlayer} action: ${stateInput}. Current States: ${playerStates[currentPlayer].join(", ")}`;
+        let userMessage = `Player ${currentPlayer} action: ${actionInput}. Current States: ${playerStates[currentPlayer].join(", ")}`;
+
+        // Replace "my special resources" or "my resources" in the user message with the actual list
+        userMessage = replaceResourcesInMessage(userMessage, currentPlayer);
 
         try {
             // Call the Groq API directly
@@ -117,13 +120,6 @@ document.getElementById('submit-state').addEventListener('click', async function
     // Clear the text input
     document.getElementById('state-input').value = '';
 });
-
-
-    // Function to replace "my resources" or "my special resources" with the player's resources
-    function replacePlayerResources(message) {
-        const resources = playerResources[currentPlayer].length > 0 ? playerResources[currentPlayer].join(', ') : 'no resources';
-        return message.replace(/my special resources|my resources/gi, resources);
-    }
 
 
 
@@ -469,3 +465,4 @@ document.querySelectorAll('.state').forEach(function(stateElement) {
         infoBox.innerHTML = `State: ${stateId}<br>Controlled By: ${currentOwner}`;
     }
 });
+ 
