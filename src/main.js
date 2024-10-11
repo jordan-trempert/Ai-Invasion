@@ -5,7 +5,7 @@ import Groq from '/groq-sdk';
 document.addEventListener("DOMContentLoaded", function() {
     // Initialize the Groq SDK
     const groq = new Groq({
-        apiKey: process.env.GROQ_API_KEY,
+        apiKey: "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",
         dangerouslyAllowBrowser: true // This is the default and can be omitted
     });
 
