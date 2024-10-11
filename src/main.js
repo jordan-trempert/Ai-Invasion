@@ -74,78 +74,50 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
 
-    // Handle state input submission for starting state or player action
-    document.getElementById('submit-state').addEventListener('click', async function() {
-        var stateInput = document.getElementById('state-input').value.toUpperCase();
+// Function to handle player message input and replace 'my special resources' with actual resources
+document.getElementById('submit-state').addEventListener('click', async function() {
+    var stateInput = document.getElementById('state-input').value.toUpperCase();
+    
+    // Check for "my resources" or "my special resources"
+    if (stateInput.includes("MY RESOURCES") || stateInput.includes("MY SPECIAL RESOURCES")) {
+        const playerResourcesList = playerResources[currentPlayer].length > 0 
+            ? playerResources[currentPlayer].join(", ") 
+            : "no resources";
+        
+        // Replace the phrase with actual resources
+        stateInput = stateInput.replace(/MY (SPECIAL )?RESOURCES/gi, playerResourcesList);
+    }
+    
+    // Continue with the Groq API and player action processing
+    if (turnPhase === 'playerTurn') {
+        // Player action during their turn
+        var actionInput = document.getElementById('state-input').value; // Player action
 
-        // Only check for state abbreviations during the 'chooseStart' phase
-        if (turnPhase === 'chooseStart') {
-            var stateElement = document.getElementById(stateInput);  // Find the state by its ID
+        // Prepare the message for the Groq API
+        const userMessage = `Player ${currentPlayer} action: ${stateInput}. Current States: ${playerStates[currentPlayer].join(", ")}`;
 
-            if (!stateElement) {
-                alert("Invalid state abbreviation. Please try again.");
-                return;
+        try {
+            // Call the Groq API directly
+            const chatCompletion = await getGroqChatCompletion(userMessage);
+
+            // Update the AI output box with the new response
+            document.getElementById('ai-output').innerHTML = chatCompletion.choices[0].message.content;
+
+            // Check for victory after the player's action
+            if (!checkVictory()) {
+                // Switch to the next player after the action
+                currentPlayer = currentPlayer === 1 ? 2 : 1;
+                updateTurnMessage(); // Update the turn message for the next player
             }
-
-            var stateId = stateElement.getAttribute('id');
-            if (stateControl[stateId]) {
-                alert("This state is already controlled by another empire. Choose a different one.");
-                return;
-            }
-
-            // Assign the state to the current player
-            if (currentPlayer === 1) {
-                stateElement.style.fill = 'red';
-                stateControl[stateId] = player1Empire;  // Player 1 controls this state
-                playerStates[1].push(stateId);  // Add state to Player 1's list
-            } else {
-                stateElement.style.fill = 'blue';
-                stateControl[stateId] = player2Empire;  // Player 2 controls this state
-                playerStates[2].push(stateId);  // Add state to Player 2's list
-            }
-
-            // Update the info-box with the new owner
-            updateInfoBox(stateElement, stateId);
-
-            // Check if both players have chosen their starting states
-            if (turnPhase === 'chooseStart' && Object.keys(stateControl).length >= 2) {
-                turnPhase = 'playerTurn';  // Move to the player turn phase
-            }
-
-            // Switch to the other player before updating the turn message
-            currentPlayer = currentPlayer === 1 ? 2 : 1;
-
-            // Update the turn message after switching the player
-            updateTurnMessage();
-
-        } else if (turnPhase === 'playerTurn') {
-            // Player action during their turn
-            var actionInput = document.getElementById('state-input').value; // Player action
-
-            // Prepare the message for the Groq API
-            const userMessage = `Player ${currentPlayer} action: ${replacePlayerResources(actionInput)}. Current States: ${playerStates[currentPlayer].join(", ")}`;
-
-            try {
-                // Call the Groq API directly
-                const chatCompletion = await getGroqChatCompletion(userMessage);
-
-                // Update the AI output box with the new response
-                document.getElementById('ai-output').innerHTML = chatCompletion.choices[0].message.content;
-
-                // Check for victory after the player's action
-                if (!checkVictory()) {
-                    // Switch to the next player after the action
-                    currentPlayer = currentPlayer === 1 ? 2 : 1;
-                    updateTurnMessage(); // Update the turn message for the next player
-                }
-            } catch (error) {
-                console.error('Error fetching from Groq API:', error);
-            }
+        } catch (error) {
+            console.error('Error fetching from Groq API:', error);
         }
+    }
 
-        // Clear the text input
-        document.getElementById('state-input').value = '';
-    });
+    // Clear the text input
+    document.getElementById('state-input').value = '';
+});
+
 
     // Function to replace "my resources" or "my special resources" with the player's resources
     function replacePlayerResources(message) {
