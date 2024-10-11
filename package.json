@@ -1,0 +1,22 @@
+{
+  "name": "ai-invasion",
+  "version": "1.0.0",
+  "description": "A turn-based game using Groq API for storytelling.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "dependencies": {
+    "groq-sdk": "^0.7.0",
+    "http-server": "^14.1.1",
+    "vite": "^5.4.8",
+    "vite-tsconfig-paths": "^5.0.1"
+  },
+  "devDependencies": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
