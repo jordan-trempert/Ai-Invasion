@@ -123,7 +123,7 @@ document.addEventListener("DOMContentLoaded", function() {
             var actionInput = document.getElementById('state-input').value; // Player action
 
             // Prepare the message for the Groq API
-            const userMessage = `Player ${currentPlayer} action: ${actionInput}. Current States: ${playerStates[currentPlayer].join(", ")}`;
+            const userMessage = `Player ${currentPlayer} action: ${replacePlayerResources(actionInput)}. Current States: ${playerStates[currentPlayer].join(", ")}`;
 
             try {
                 // Call the Groq API directly
@@ -146,6 +146,13 @@ document.addEventListener("DOMContentLoaded", function() {
         // Clear the text input
         document.getElementById('state-input').value = '';
     });
+
+    // Function to replace "my resources" or "my special resources" with the player's resources
+    function replacePlayerResources(message) {
+        const resources = playerResources[currentPlayer].length > 0 ? playerResources[currentPlayer].join(', ') : 'no resources';
+        return message.replace(/my special resources|my resources/gi, resources);
+    }
+
 
 
 
