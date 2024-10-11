@@ -1,5 +1,5 @@
 // Ensure the Groq SDK is globally available after loading from CDN
-import * as Groq from 'groq-sdk';
+import * as Groq from './groq-sdk';
 
 // Wait for the document to be ready
 document.addEventListener("DOMContentLoaded", function() {
