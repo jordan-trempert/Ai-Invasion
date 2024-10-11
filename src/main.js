@@ -1,5 +1,5 @@
 // Ensure the Groq SDK is globally available after loading from CDN
-const Groq = require("groq-sdk"); // Ensure this line is included at the top
+import Groq from 'groq-sdk';
 
 
 // Wait for the document to be ready
